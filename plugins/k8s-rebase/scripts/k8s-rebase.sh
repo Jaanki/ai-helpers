@@ -888,6 +888,25 @@ if [[ -n "$CODEGEN_SCRIPT" ]]; then
   info "Updated code-generator version to ${API_VERSION}"
 
   # Run codegen — try common make targets, auto-retry on dropped flags
+  # Extract toolchain version from go.mod if present (may differ from REQUIRED_GO)
+  GOMOD_FILE="$(dirname "$CODEGEN_SCRIPT")/../go.mod"
+  TOOLCHAIN_GO=""
+  if [[ -f "$GOMOD_FILE" ]]; then
+    TOOLCHAIN_GO=$(grep "^toolchain " "$GOMOD_FILE" | awk '{print $2}' | sed 's/go//' || true)
+  fi
+  
+  # Prefer toolchain version over base go directive for codegen
+  CODEGEN_GO_VERSION="${TOOLCHAIN_GO:-$REQUIRED_GO}"
+  
+  if [[ -n "$CODEGEN_GO_VERSION" ]]; then
+    CURRENT_GO=$(go env GOVERSION 2>/dev/null | sed 's/go//' || echo "0.0")
+    if [[ "$CURRENT_GO" != "$CODEGEN_GO_VERSION"* ]]; then
+      info "WARNING: Current Go version ($CURRENT_GO) differs from toolchain ($CODEGEN_GO_VERSION)"
+      info "Codegen output may differ from CI. Re-run codegen with Go $CODEGEN_GO_VERSION if verification fails."
+    else
+      info "Using Go $CURRENT_GO for codegen (matches toolchain $CODEGEN_GO_VERSION)"
+    fi
+  fi
   CODEGEN_DIR=$(dirname "$(dirname "$CODEGEN_SCRIPT")")
   CODEGEN_RAN=0
   CODEGEN_FAILED=0

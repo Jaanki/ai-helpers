@@ -170,6 +170,17 @@ base branch moved or could not be fetched, a commit lacks `Signed-off-by:`,
 than `go.mod`, `go.sum`, `go.work*`, `vendor/`, and `.grype.yaml`. The
 scripts never rebase, push, or change licensing policy.
 
+### ACM CVE tracker sync
+
+After Submariner `release-X.Y` publication PRs are open, the skill's agent
+procedure (not the scripts) checks open ACM trackers for the mapped stream
+(`0.X` → ACM `2.(X-7)`) via filter
+[99723](https://redhat.atlassian.net/issues/?filter=99723), matches only
+**FIXED** findings covered by those PRs, transitions matched Jiras to
+**Review**, and comments with PR links. NEEDS\_REVIEW and unmatched trackers
+are left alone. See
+[skills/fix-go-cves/SKILL.md](skills/fix-go-cves/SKILL.md#4-acm-cve-tracker-sync-after-prs-open).
+
 A recipe also needs an explicit Git push route: `branch.<name>.pushRemote` or
 `remote.pushDefault`, with one effective GitHub push URL and a confirmed base.
 A destination matching the base can be confirmed offline. A user fork needs

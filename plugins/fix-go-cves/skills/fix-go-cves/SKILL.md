@@ -225,8 +225,14 @@ Build the FIXED set from each run log Summary (`FIXED: <package> … for
 | ---- | ----------- |
 | Advisory | Jira CVE id/label maps to a FIXED advisory, or the summary package is FIXED (see below). |
 | Stream | Summary contains `[rhacm-2.N]` for the mapped (or user-named) ACM train. |
-| Coverage | An **upstream** `submariner-io` PR (`OPEN`, base `release-X.Y`) owns the Jira `pscomponent` image (table below). |
+| Coverage | An **upstream** `submariner-io` PR (`OPEN`, base `release-X.Y`) owns **this Jira's** `pscomponent` image (table below). |
 | Confidence | Never match NEEDS\_REVIEW, IGNORED, outstanding/still-present, or unverified (rescan failed) findings. |
+
+**Per-component only:** one CVE often has many ACM trackers (one per image).
+Transition only the Jiras whose `pscomponent` maps to a repo that already has
+an upstream CVE-fix PR open. Example: if only `subctl`'s PR is open, move only
+`pscomponent:…/subctl-…` trackers for that CVE—leave gateway/operator/lighthouse
+siblings for the same CVE untouched until their upstream PRs exist.
 
 **Advisory detail:** match on `CVE-…` / GHSA / GO id among FIXED advisories, or
 on a FIXED package path in the summary (`golang.org/x/net`, …). For stdlib /

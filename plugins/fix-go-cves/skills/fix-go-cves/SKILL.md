@@ -1,6 +1,6 @@
 ---
 name: fix-go-cves
-description: Use when asked to fix the CVE/GHSA findings of a Go repository — scans every module with Grype, updates dependencies on a new branch, ignores only findings without a published fix, verifies with rebuild, tests and rescan, and delivers the captured runtime log. After Submariner release PRs are open, sync matching open ACM CVE trackers to Review. Also scans without changes when only a report is wanted. For one known CVE with a user-supplied fix version or fork, use golang:fix-cve instead.
+description: Use when asked to fix the CVE/GHSA findings of a Go repository — scans every module with Grype, updates dependencies on a new branch, ignores only findings without a published fix, verifies with rebuild, tests and rescan, and delivers the captured runtime log. After Submariner CVE-fix PRs are open upstream, sync matching open ACM CVE trackers to Review. Also scans without changes when only a report is wanted. For one known CVE with a user-supplied fix version or fork, use golang:fix-cve instead.
 argument-hint: "[repo] [branch] | all <branch>"
 user-invocable: true
 allowed-tools: Bash, Read
@@ -169,17 +169,22 @@ Keep the Summary's counts distinct from its individual repair detail; do not
 reconstruct totals or imply readiness from an exit code alone. For `all`, retain
 a separate log/result per repository and run them serially.
 
-## 4. ACM CVE tracker sync (after PRs open)
+## 4. ACM CVE tracker sync (after upstream PRs open)
 
 Agent-owned Atlassian/Jira follow-up. Scripts do not touch trackers and still
-must not push or open PRs. Run this only after the operator (or a separate
-explicit request) has opened the publication PRs from a completed fix run.
+must not push or open PRs. **Do not run this during the fix engine invocation.**
+It is a separate step that runs only after Submariner CVE-fix PRs are open
+**upstream** on `github.com/submariner-io/<repo>` (not merely a printed recipe,
+a fork push, or a draft on a personal fork).
 
 ### When
 
 1. Fix run finished for Submariner `release-X.Y` / `X.Y` (one repo or `all`).
-2. At least one upstream PR for that branch is open. Skip repos whose recipe was
-   withheld (tests failed, NOT READY, or no commits).
+2. **Hard gate:** at least one CVE-fix PR is `OPEN` on the upstream
+   `submariner-io` org against that `release-X.Y` branch. Confirm with
+   `gh pr view` / `gh pr list --repo submariner-io/<repo> --base release-X.Y`
+   before any Jira transition. Skip components with no upstream PR (tests
+   failed, NOT READY, recipe withheld, or PR only on a fork).
 3. The target ships in ACM (typical for Submariner `release-*`), or the user
    asks for tracker sync. Skip ad-hoc branches unless requested.
 
@@ -220,7 +225,7 @@ Build the FIXED set from each run log Summary (`FIXED: <package> … for
 | ---- | ----------- |
 | Advisory | Jira CVE id/label maps to a FIXED advisory, or the summary package is FIXED (see below). |
 | Stream | Summary contains `[rhacm-2.N]` for the mapped (or user-named) ACM train. |
-| Coverage | An **opened** PR owns the Jira `pscomponent` image (table below). |
+| Coverage | An **upstream** `submariner-io` PR (`OPEN`, base `release-X.Y`) owns the Jira `pscomponent` image (table below). |
 | Confidence | Never match NEEDS\_REVIEW, IGNORED, outstanding/still-present, or unverified (rescan failed) findings. |
 
 **Advisory detail:** match on `CVE-…` / GHSA / GO id among FIXED advisories, or

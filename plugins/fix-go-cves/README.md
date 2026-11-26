@@ -172,14 +172,14 @@ scripts never rebase, push, or change licensing policy.
 
 ### ACM CVE tracker sync
 
-After Submariner `release-X.Y` publication PRs are open, the skill's agent
-procedure (not the scripts) checks open ACM trackers for the mapped stream
-(`0.X` → ACM `2.(X-7)`) via filter
-[99723](https://redhat.atlassian.net/issues/?filter=99723), matches only
-**FIXED** findings covered by those PRs, transitions matched Jiras to
-**Review**, and comments with PR links. NEEDS\_REVIEW and unmatched trackers
-are left alone. See
-[skills/fix-go-cves/SKILL.md](skills/fix-go-cves/SKILL.md#4-acm-cve-tracker-sync-after-prs-open).
+Separate agent follow-up (not part of the fix engine): run only after Submariner
+CVE-fix PRs are `OPEN` **upstream** on `submariner-io` against `release-X.Y`.
+Then check open ACM trackers for the mapped stream (`0.X` → ACM `2.(X-7)`) via
+filter [99723](https://redhat.atlassian.net/issues/?filter=99723), match only
+**FIXED** findings covered by those upstream PRs, transition matched Jiras to
+**Review**, and comment with PR links. NEEDS\_REVIEW and unmatched trackers are
+left alone. See
+[skills/fix-go-cves/SKILL.md](skills/fix-go-cves/SKILL.md#4-acm-cve-tracker-sync-after-upstream-prs-open).
 
 A recipe also needs an explicit Git push route: `branch.<name>.pushRemote` or
 `remote.pushDefault`, with one effective GitHub push URL and a confirmed base.
